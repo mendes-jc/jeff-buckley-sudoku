@@ -1,0 +1,15 @@
+.screen { max-width: 480px; margin: 0 auto; padding: 24px 16px; min-height: 100dvh; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; }
+.screen .stack { display: flex; flex-direction: column; gap: 10px; }
+.row { display: flex; gap: 10px; }
+.screen button, .modal button { flex: 1; min-height: 44px; padding: 10px 14px; border-radius: 8px; border: 1px solid currentColor; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.screen label { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.best-row { display: flex; justify-content: space-between; }
+.screen dl { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; margin: 0; }
+.best-row { grid-column: 1 / -1; }
+.play-menu { position: fixed; top: 8px; right: 8px; z-index: 5; min-height: 36px; padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(243, 236, 228, 0.4); background: rgba(0, 0, 0, 0.5); color: #f3ece4; }
+.modal-backdrop { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.7); }
+.modal { background: #1d1815; color: #f3ece4; border-radius: 12px; padding: 24px; width: min(90vw, 360px); text-align: center; }
+.win-time { font-size: 40px; font-variant-numeric: tabular-nums; margin: 8px 0 16px; }
+.celebrate { font-size: 32px; animation: bounce 1s ease-in-out infinite; }
+@keyframes bounce { 50% { transform: translateY(-8px); } }
+@media (prefers-reduced-motion: reduce) { .celebrate { animation: none; } }

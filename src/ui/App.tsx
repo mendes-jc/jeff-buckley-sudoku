@@ -1,16 +1,54 @@
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { PlayScreen } from './components/PlayScreen';
+import { Settings } from './components/Settings';
+import { StartScreen } from './components/StartScreen';
+import { StatsScreen } from './components/StatsScreen';
+import { WinModal } from './components/WinModal';
 import { useGame } from './hooks/useGame';
+import './components/screens.css';
 
-/** Minimal shell: Task 16 replaces this with the start screen, routing and modals. */
+type Route = 'start' | 'play' | 'stats' | 'settings';
+
+/** Router between start / play / stats / settings; the win modal overlays the play screen. */
 export function App() {
-  const { state, dispatch, startGame, conflicts, backgroundPhoto } = useGame();
+  const { state, dispatch, startGame, startDaily, conflicts, backgroundPhoto, refreshSound } = useGame();
+  const [route, setRoute] = useState<Route>('start');
+  const toStart = () => setRoute('start');
 
-  // Placeholder for the no-active-game case: auto-start an easy game.
-  useEffect(() => {
-    if (state === null) startGame('easy');
-  }, [state, startGame]);
+  if (route === 'stats') return <StatsScreen onBack={toStart} />;
+  if (route === 'settings') return <Settings onBack={toStart} onSoundChange={refreshSound} />;
 
-  if (state === null) return null;
-  return <PlayScreen state={state} dispatch={dispatch} conflicts={conflicts} backgroundPhoto={backgroundPhoto} />;
+  if (route === 'play' && state) {
+    return (
+      <>
+        <PlayScreen state={state} dispatch={dispatch} conflicts={conflicts} backgroundPhoto={backgroundPhoto} />
+        <button className="play-menu" onClick={toStart}>
+          Menu
+        </button>
+        {state.status === 'won' && (
+          <WinModal
+            state={state}
+            onNewGame={toStart}
+            onPlayAgain={() => startGame(state.difficulty)}
+          />
+        )}
+      </>
+    );
+  }
+
+  return (
+    <StartScreen
+      onStart={(d) => {
+        startGame(d);
+        setRoute('play');
+      }}
+      onDaily={() => {
+        startDaily();
+        setRoute('play');
+      }}
+      onResume={() => setRoute('play')}
+      onStats={() => setRoute('stats')}
+      onSettings={() => setRoute('settings')}
+    />
+  );
 }

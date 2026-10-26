@@ -129,5 +129,8 @@ export function useGame(injectedMedia?: MediaController) {
     clearGame();
   }, [status]);
 
-  return { state, dispatch, startGame, startDaily, conflicts, backgroundPhoto };
+  /** Re-read persisted settings and push them into the live MediaController (called by Settings). */
+  const refreshSound = useCallback(() => applySound(mediaRef.current), []);
+
+  return { state, dispatch, startGame, startDaily, conflicts, backgroundPhoto, refreshSound };
 }
