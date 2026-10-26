@@ -1,0 +1,12 @@
+{
+  "photos": [
+    "/assets/photos/placeholder-1.svg",
+    "/assets/photos/placeholder-2.svg",
+    "/assets/photos/placeholder-3.svg"
+  ],
+  "moans": [
+    "/assets/moans/placeholder-1.wav",
+    "/assets/moans/placeholder-2.wav",
+    "/assets/moans/placeholder-3.wav"
+  ]
+}
