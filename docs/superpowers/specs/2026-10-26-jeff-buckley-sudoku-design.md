@@ -125,6 +125,18 @@ puzzle grades into the requested tier.
 Entering a value that duplicates within its row, column, or box highlights the
 conflict live. This is the only form of mistake feedback (no mistake limit).
 
+### Daily puzzle
+
+- A **puzzle-of-the-day**: everyone gets the same puzzle on a given calendar
+  date. Generated deterministically from a seed derived from the date (e.g.
+  `YYYY-MM-DD`), so generation is reproducible without a backend.
+- Selectable from the difficulty/start screen as its own entry alongside the
+  tiers. Fixed difficulty for the daily (Medium) so the shared puzzle is
+  comparable day to day.
+- Completing today's daily advances a **daily streak** (consecutive days
+  solved); missing a day resets it. The current day's completion state is
+  tracked so a finished daily shows as done until the next date.
+
 ## Assets & Media
 
 - **Layout:** `public/assets/photos/` (grid backgrounds), `public/assets/moans/`
@@ -146,6 +158,7 @@ works if storage is blocked). Stored:
   undo stack, selected cell).
 - **Settings** — theme, sound on/off, volume.
 - **Stats** — best time per tier, games completed, win streak.
+- **Daily** — last-completed daily date and current daily streak.
 
 ## PWA & Theme
 
@@ -160,6 +173,7 @@ works if storage is blocked). Stored:
   - Generator always yields a puzzle with a **unique** solution.
   - Solver correctness.
   - Difficulty grading stays within tier bounds.
+  - Daily puzzle is deterministic: same date seed yields the same puzzle.
   - Completion detection fires once per row/col/box on filled-and-valid, and
     re-fires after break/re-complete.
   - Conflict detection correctness.
@@ -175,6 +189,5 @@ works if storage is blocked). Stored:
 - Hints, mistake-check, mistake limit, auto-remove notes.
 - Native app-store builds / native shell.
 - Backend, accounts, cloud sync, leaderboards.
-- Daily puzzle (can be added later; not in this build).
 - Adaptive/unlocking difficulty (fixed player-picked tiers only).
 - Finale moan on full solve (hook left, not built).
