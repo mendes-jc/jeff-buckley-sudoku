@@ -123,6 +123,21 @@ describe('play screen', () => {
     expect(cell(i).getAttribute('data-value')).toBe('0');
   });
 
+  it('input (pad click and 1-9 keydown) is ignored while paused', async () => {
+    const p = puzzleOf('easy');
+    const i = firstBlank(p);
+    render(<Harness puzzle={p} />);
+    await userEvent.click(cell(i));
+    await userEvent.click(screen.getByRole('button', { name: /^pause/i }));
+    expect(digitBtn(5).disabled).toBe(true);
+    await userEvent.click(digitBtn(5));
+    await userEvent.keyboard('5');
+    expect(cell(i).getAttribute('data-value')).toBe('0');
+    await userEvent.click(screen.getByRole('button', { name: /^resume/i }));
+    await userEvent.keyboard('5');
+    expect(cell(i).getAttribute('data-value')).toBe('5');
+  });
+
   it('header shows mm:ss and difficulty; photo sits under a scrim', () => {
     render(<Harness puzzle={puzzleOf('hard')} photo="/p.jpg" />);
     expect(screen.getByText('00:00')).toBeTruthy();

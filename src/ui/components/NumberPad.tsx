@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { Action, GameState } from '../../game/state';
 
 /** Remaining = 9 - occurrences on the board (occupancy, never correctness; Ruling 2). */
@@ -11,14 +11,19 @@ export function remainingCounts(cells: GameState['cells']): number[] {
 export function NumberPad({ state, dispatch }: { state: GameState; dispatch: (a: Action) => void }) {
   const remaining = remainingCounts(state.cells);
 
+  // Latest values via ref so the listener is attached once.
+  const latest = useRef({ remaining, paused: state.paused, dispatch });
+  latest.current = { remaining, paused: state.paused, dispatch };
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey || e.altKey) return;
-      if (/^[1-9]$/.test(e.key) && remaining[Number(e.key)] > 0) dispatch({ type: 'input', digit: Number(e.key) });
+      const { remaining: rem, paused, dispatch: d } = latest.current;
+      if (paused || e.ctrlKey || e.metaKey || e.altKey) return;
+      if (/^[1-9]$/.test(e.key) && rem[Number(e.key)] > 0) d({ type: 'input', digit: Number(e.key) });
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  });
+  }, []);
 
   return (
     <div className="numberpad">
@@ -28,7 +33,7 @@ export function NumberPad({ state, dispatch }: { state: GameState; dispatch: (a:
           type="button"
           className={`pad-digit${state.notesMode ? ' notes-active' : ''}`}
           aria-label={`Digit ${d}, ${remaining[d]} remaining`}
-          disabled={remaining[d] <= 0}
+          disabled={state.paused || remaining[d] <= 0}
           onClick={() => dispatch({ type: 'input', digit: d })}
         >
           <span className="digit">{d}</span>
