@@ -1,0 +1,63 @@
+/* Design tokens. Light is the base; dark applies for system-dark unless forced light,
+   and whenever data-theme="dark" is set (see useTheme). */
+:root {
+  color-scheme: light;
+  --bg: #f6efe6;
+  --fg: #1d1815;
+  --surface: #fffaf3;
+  --accent: #b5651d;
+  --accent-fg: #ffffff;
+  --danger: #c62828;
+  --line: rgba(29, 24, 21, 0.28);
+  --line-strong: #1d1815;
+  --scrim: rgba(246, 239, 230, 0.82);
+  --cell-bg: rgba(255, 255, 255, 0.55);
+  --peer: rgba(29, 24, 21, 0.09);
+  --same: rgba(181, 101, 29, 0.25);
+  --select: rgba(181, 101, 29, 0.45);
+  --ctl-bg: rgba(255, 250, 243, 0.8);
+  --backdrop: rgba(0, 0, 0, 0.55);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #14110f;
+    --fg: #f3ece4;
+    --surface: #1d1815;
+    --accent: #e8b86d;
+    --accent-fg: #14110f;
+    --danger: #ff6b6b;
+    --line: rgba(243, 236, 228, 0.25);
+    --line-strong: #f3ece4;
+    --scrim: rgba(15, 12, 10, 0.72);
+    --cell-bg: rgba(0, 0, 0, 0.35);
+    --peer: rgba(243, 236, 228, 0.12);
+    --same: rgba(232, 184, 109, 0.28);
+    --select: rgba(232, 184, 109, 0.5);
+    --ctl-bg: rgba(0, 0, 0, 0.5);
+    --backdrop: rgba(0, 0, 0, 0.7);
+  }
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #14110f;
+  --fg: #f3ece4;
+  --surface: #1d1815;
+  --accent: #e8b86d;
+  --accent-fg: #14110f;
+  --danger: #ff6b6b;
+  --line: rgba(243, 236, 228, 0.25);
+  --line-strong: #f3ece4;
+  --scrim: rgba(15, 12, 10, 0.72);
+  --cell-bg: rgba(0, 0, 0, 0.35);
+  --peer: rgba(243, 236, 228, 0.12);
+  --same: rgba(232, 184, 109, 0.28);
+  --select: rgba(232, 184, 109, 0.5);
+  --ctl-bg: rgba(0, 0, 0, 0.5);
+  --backdrop: rgba(0, 0, 0, 0.7);
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; overflow-x: hidden; }
+button { font: inherit; }

@@ -4,14 +4,18 @@ import { Settings } from './components/Settings';
 import { StartScreen } from './components/StartScreen';
 import { StatsScreen } from './components/StatsScreen';
 import { WinModal } from './components/WinModal';
+import type { MediaController } from '../media/media';
 import { useGame } from './hooks/useGame';
+import { useTheme } from './hooks/useTheme';
+import './theme.css';
 import './components/screens.css';
 
 type Route = 'start' | 'play' | 'stats' | 'settings';
 
 /** Router between start / play / stats / settings; the win modal overlays the play screen. */
-export function App() {
-  const { state, dispatch, startGame, startDaily, conflicts, backgroundPhoto, refreshSound } = useGame();
+export function App({ media }: { media?: MediaController } = {}) {
+  useTheme(); // apply the persisted theme at startup, not only when Settings is opened
+  const { state, dispatch, startGame, startDaily, conflicts, backgroundPhoto, refreshSound } = useGame(media);
   const [route, setRoute] = useState<Route>('start');
   const toStart = () => setRoute('start');
 
