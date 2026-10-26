@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { findConflicts } from '../conflicts';
 import { completedUnitKeys, newlyCompleted } from '../completion';
 import type { Board, CellValue } from '../types';
 
@@ -36,6 +37,13 @@ describe('completedUnitKeys', () => {
     const b = withCells([0, 1, 2, 3, 4, 5, 6, 7, 8]);
     b[8] = b[0];
     expect(completedUnitKeys(b).has('row-0')).toBe(false);
+  });
+
+  it('regression: valid row stays complete when a cell clashes in its column with a stray cell', () => {
+    const b = withCells([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+    b[27] = b[0]; // same column as cell 0, outside row 0 and its box
+    expect(findConflicts(b).has(0)).toBe(true);
+    expect(completedUnitKeys(b).has('row-0')).toBe(true);
   });
 
   it('reports all 27 units for a solved board', () => {
