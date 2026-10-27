@@ -1,20 +1,302 @@
-.screen { max-width: 480px; margin: 0 auto; padding: 24px 16px; min-height: 100dvh; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; }
-.screen .stack { display: flex; flex-direction: column; gap: 10px; }
-.row { display: flex; gap: 10px; }
-.screen button, .modal button { flex: 1; min-width: 0; min-height: 44px; padding: 10px 14px; border-radius: 8px; border: 1px solid currentColor; background: transparent; color: inherit; font: inherit; cursor: pointer; }
-.screen label { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.screen dl { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; margin: 0; }
-.best-row { display: flex; justify-content: space-between; grid-column: 1 / -1; }
-.play-menu { position: fixed; top: 8px; right: 16px; z-index: 5; min-height: 36px; padding: 4px 12px; border-radius: 8px; border: 1px solid var(--line-strong); background: var(--ctl-bg); color: var(--fg); }
-.modal-backdrop { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; background: var(--backdrop); }
-.modal { background: var(--surface); color: var(--fg); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4); border-radius: 12px; padding: 24px; width: min(90vw, 360px); text-align: center; }
-.win-time { font-size: 40px; font-variant-numeric: tabular-nums; margin: 8px 0 16px; }
-.win-modal { position: relative; overflow: hidden; animation: pop 0.35s ease-out; }
-.celebrate { font-size: 32px; color: var(--accent); animation: bounce 1s ease-in-out infinite; }
-.win-modal::before, .win-modal::after { content: ''; position: absolute; top: -14px; width: 8px; height: 14px; border-radius: 2px; background: var(--accent); animation: confetti 2.4s ease-in infinite; }
-.win-modal::before { left: 22%; }
-.win-modal::after { left: 70%; background: var(--danger); animation-delay: 0.8s; }
-@keyframes confetti { to { transform: translateY(260px) rotate(540deg); opacity: 0; } }
-@keyframes pop { from { transform: scale(0.85); opacity: 0; } }
-@keyframes bounce { 50% { transform: translateY(-8px); } }
-@media (prefers-reduced-motion: reduce) { .celebrate, .win-modal, .win-modal::before, .win-modal::after { animation: none; } }
+/* ===================== Start / Stats / Settings screens ===================== */
+.screen {
+  max-width: 440px;
+  margin: 0 auto;
+  padding: calc(32px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.screen h1,
+.screen h2,
+.screen h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.005em;
+}
+.screen h2 {
+  font-size: 26px;
+}
+.screen h3 {
+  font-size: 18px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* ---- Start screen ---- */
+.start-screen {
+  justify-content: center;
+  text-align: center;
+}
+.start-screen h1 {
+  font-size: clamp(34px, 11vw, 48px);
+  line-height: 1.04;
+  font-weight: 700;
+  margin: 8px auto 2px;
+  max-width: 10ch;
+  background: linear-gradient(135deg, var(--fg) 20%, var(--blush) 60%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.start-screen h1::after {
+  content: '♪ a little soul in every puzzle ♪';
+  display: block;
+  margin-top: 14px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  background: none;
+  -webkit-text-fill-color: var(--muted);
+  color: var(--muted);
+}
+.start-screen .stack {
+  margin-top: 10px;
+}
+
+.screen .stack {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.row {
+  display: flex;
+  gap: 11px;
+}
+/* Side-by-side buttons flex; lone direct-child buttons (e.g. Back) stay normal size */
+.row button {
+  flex: 1;
+  width: auto;
+}
+.screen > button {
+  align-self: center;
+  max-width: 320px;
+}
+
+/* Buttons — glass pills; primary (Daily / first stack action) glows rose-gold */
+.screen button,
+.modal button {
+  width: 100%;
+  min-width: 0;
+  min-height: 52px;
+  padding: 13px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--ctl-border);
+  background: var(--ctl-bg);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 26px -18px rgba(0, 0, 0, 0.5);
+  transition: transform 0.09s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.screen button:active,
+.modal button:active {
+  transform: translateY(1px) scale(0.985);
+}
+.screen button:hover,
+.modal button:hover {
+  border-color: var(--accent-soft);
+}
+/* Daily = the hero action on the start screen */
+.start-screen .stack button:last-child {
+  background: linear-gradient(140deg, var(--blush), var(--accent));
+  color: var(--accent-fg);
+  border-color: transparent;
+  box-shadow: 0 14px 30px -14px var(--blush);
+}
+.start-screen .row button {
+  min-height: 46px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* ---- Stats ---- */
+.stats-screen dl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 12px;
+  margin: 0;
+  background: var(--surface);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  backdrop-filter: blur(10px);
+}
+.stats-screen dt {
+  color: var(--muted);
+  padding: 7px 0;
+}
+.stats-screen dd {
+  margin: 0;
+  padding: 7px 0;
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+.best-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--line);
+  padding-top: 2px;
+}
+.best-row:first-child {
+  border-top: none;
+}
+
+/* ---- Settings ---- */
+.settings-screen label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+}
+.settings-screen select {
+  font: inherit;
+  color: var(--fg);
+  background: var(--ctl-bg);
+  border: 1px solid var(--ctl-border);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+.settings-screen input[type='range'] {
+  accent-color: var(--accent);
+  flex: 1;
+  max-width: 180px;
+}
+.settings-screen input[type='checkbox'] {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--accent);
+}
+
+/* ---- Floating menu button on the play screen ---- */
+.play-menu {
+  position: fixed;
+  top: calc(10px + env(safe-area-inset-top));
+  right: 16px;
+  z-index: 5;
+  min-height: 38px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--ctl-border);
+  background: var(--ctl-bg);
+  color: var(--fg);
+  font-weight: 600;
+  font-size: 14px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 22px -14px rgba(0, 0, 0, 0.6);
+}
+
+/* ---- Win modal ---- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: var(--backdrop);
+  backdrop-filter: blur(6px);
+}
+.modal {
+  background: var(--surface-solid);
+  color: var(--fg);
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.7);
+  border: 1px solid var(--panel-border);
+  border-radius: 24px;
+  padding: 30px 26px 24px;
+  width: min(92vw, 360px);
+  text-align: center;
+}
+.modal h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 26px;
+  margin: 6px 0 0;
+}
+.win-time {
+  font-family: var(--font-display);
+  font-size: 46px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  margin: 6px 0 18px;
+}
+.modal .row {
+  margin-top: 4px;
+}
+.win-modal {
+  position: relative;
+  overflow: hidden;
+  animation: pop 0.38s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+.celebrate {
+  font-size: 34px;
+  letter-spacing: 0.1em;
+  color: var(--blush);
+  animation: bounce 1.1s ease-in-out infinite;
+}
+.win-modal::before,
+.win-modal::after {
+  content: '';
+  position: absolute;
+  top: -16px;
+  width: 9px;
+  height: 15px;
+  border-radius: 2px;
+  background: var(--accent);
+  animation: confetti 2.4s ease-in infinite;
+}
+.win-modal::before {
+  left: 20%;
+}
+.win-modal::after {
+  left: 72%;
+  background: var(--blush);
+  animation-delay: 0.8s;
+}
+@keyframes confetti {
+  to {
+    transform: translateY(300px) rotate(560deg);
+    opacity: 0;
+  }
+}
+@keyframes pop {
+  from {
+    transform: scale(0.82);
+    opacity: 0;
+  }
+}
+@keyframes bounce {
+  50% {
+    transform: translateY(-9px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .celebrate,
+  .win-modal,
+  .win-modal::before,
+  .win-modal::after,
+  .screen button,
+  .modal button {
+    animation: none;
+    transition: none;
+  }
+}

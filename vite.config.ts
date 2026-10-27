@@ -12,8 +12,8 @@ export default defineConfig({
         name: 'Jeff Buckley Sudoku',
         short_name: 'JB Sudoku',
         description: 'A Sudoku game with a little Jeff Buckley soul.',
-        theme_color: '#1a1410',
-        background_color: '#1a1410',
+        theme_color: '#241320',
+        background_color: '#241320',
         display: 'standalone',
         start_url: '/',
         icons: [
