@@ -116,6 +116,17 @@
   font-weight: 500;
   color: var(--muted);
 }
+.start-footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.start-footer .love {
+  color: var(--blush);
+  font-weight: 600;
+}
 
 /* ---- Stats ---- */
 .stats-screen dl {
