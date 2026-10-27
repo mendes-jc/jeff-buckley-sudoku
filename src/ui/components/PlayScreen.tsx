@@ -26,10 +26,10 @@ export function PlayScreen({ state, dispatch, conflicts, backgroundPhoto }: Play
       <div className="bg-scrim" data-testid="bg-scrim" aria-hidden="true" />
       <div className="play-content">
         <Header state={state} />
+        <Controls state={state} dispatch={dispatch} />
         <div className={`board-wrap${state.paused ? ' is-paused' : ''}`}>
           <Grid state={state} conflicts={conflicts} dispatch={dispatch} />
         </div>
-        <Controls state={state} dispatch={dispatch} />
         <NumberPad state={state} dispatch={dispatch} />
       </div>
     </div>

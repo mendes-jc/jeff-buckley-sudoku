@@ -73,6 +73,8 @@
 /* ---- Board (frosted glass over the photo) ---- */
 .board-wrap {
   position: relative;
+  /* center the grid vertically between the controls (above) and pad (below) */
+  margin-block: auto;
   padding: 10px;
   border-radius: calc(var(--radius) + 4px);
   background: var(--surface);
@@ -216,25 +218,29 @@
 
 /* ---- Number pad ---- */
 .numberpad {
-  display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  gap: 5px;
-  margin-top: auto;
-  padding-top: 4px;
+  --pad-gap: 9px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--pad-gap);
+  margin-top: 0;
+  padding-top: 6px;
 }
 .pad-digit {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  /* 5 per row => wraps to two lines (5 + 4, second row centered) */
+  flex: 0 1 calc((100% - 4 * var(--pad-gap)) / 5);
   min-width: 0;
-  min-height: 58px;
-  border-radius: var(--radius-sm);
+  min-height: 76px;
+  border-radius: var(--radius);
   border: 1px solid var(--ctl-border);
   background: var(--ctl-bg);
   color: var(--fg);
   font-family: var(--font-display);
-  font-size: 31px;
+  font-size: 38px;
   font-weight: 600;
   backdrop-filter: blur(8px);
   box-shadow: 0 6px 16px -12px rgba(0, 0, 0, 0.6);
@@ -252,10 +258,10 @@
 }
 .pad-digit .remaining {
   position: absolute;
-  top: 4px;
-  right: 6px;
+  top: 6px;
+  right: 9px;
   font-family: var(--font-ui);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--muted);
 }
@@ -266,11 +272,11 @@
 
 @media (max-width: 400px) {
   .numberpad {
-    gap: 4px;
+    --pad-gap: 7px;
   }
   .pad-digit {
-    min-height: 54px;
-    font-size: 26px;
+    min-height: 64px;
+    font-size: 32px;
   }
 }
 /* On larger / taller screens present the game as a centered console rather
@@ -280,6 +286,10 @@
     justify-content: center;
     gap: 18px;
     padding-top: 24px;
+  }
+  /* desktop: keep a compact centered console rather than spreading full-height */
+  .board-wrap {
+    margin-block: 0;
   }
   .numberpad {
     margin-top: 18px;
