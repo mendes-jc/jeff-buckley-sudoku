@@ -36,7 +36,7 @@ export function StartScreen({ onStart, onDaily, onResume, onStats, onSettings }:
         <button onClick={onSettings}>Settings</button>
       </div>
       <footer className="start-footer">
-        made with <span className="love">love</span> for thatazini
+        made with <span className="love">love</span> for thatazini laranxinha da silva gonzalez
       </footer>
     </main>
   );
