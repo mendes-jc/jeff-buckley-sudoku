@@ -36,8 +36,22 @@ export class MediaController {
     try {
       const audio = new Audio(src);
       audio.volume = this.volume;
+      // Release the underlying media player once the clip is done (or fails).
+      // Android WebView caps concurrent media players; without this, a game's
+      // moans pile up and the finale — the last sound created — can't get a
+      // player and silently fails. Desktop browsers don't hit the cap.
+      const release = () => {
+        try {
+          audio.src = '';
+          audio.load?.();
+        } catch {
+          /* ignore */
+        }
+      };
+      audio.addEventListener?.('ended', release, { once: true });
+      audio.addEventListener?.('error', release, { once: true });
       const p = audio.play();
-      if (p && typeof p.catch === 'function') p.catch(() => {});
+      if (p && typeof p.catch === 'function') p.catch(() => release());
     } catch {
       // audio unavailable or blocked; ignore
     }

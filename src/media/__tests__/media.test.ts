@@ -7,12 +7,24 @@ class MockAudio {
   static instances: MockAudio[] = [];
   volume = 1;
   played = 0;
+  loaded = 0;
+  listeners: Record<string, Array<() => void>> = {};
   constructor(public src: string) {
     MockAudio.instances.push(this);
   }
   play(): Promise<void> {
     this.played++;
     return Promise.resolve();
+  }
+  addEventListener(ev: string, cb: () => void): void {
+    (this.listeners[ev] ||= []).push(cb);
+  }
+  load(): void {
+    this.loaded++;
+  }
+  /** test helper: fire a registered event */
+  fire(ev: string): void {
+    (this.listeners[ev] || []).forEach((cb) => cb());
   }
 }
 
@@ -73,6 +85,24 @@ describe('MediaController', () => {
     m.setMuted(true);
     m.playEnding();
     expect(MockAudio.instances).toHaveLength(0);
+  });
+
+  it('releases the media player after a clip ends, so players do not pile up', () => {
+    const m = new MediaController(manifest, makeRng(1));
+    m.playMoan();
+    const a = MockAudio.instances[0];
+    expect(a.src).not.toBe('');
+    a.fire('ended'); // clip finished
+    expect(a.src).toBe(''); // player released
+    expect(a.loaded).toBe(1);
+  });
+
+  it('releases the media player if the clip errors', () => {
+    const m = new MediaController(manifest, makeRng(1));
+    m.playEnding();
+    const a = MockAudio.instances[0];
+    a.fire('error');
+    expect(a.src).toBe('');
   });
 
   it('clamps volume to [0,1]', () => {

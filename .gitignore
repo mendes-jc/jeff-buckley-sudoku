@@ -3,3 +3,6 @@ dist/
 .DS_Store
 *.local
 *.tsbuildinfo
+
+# Built APK artifacts
+dist-apk/
