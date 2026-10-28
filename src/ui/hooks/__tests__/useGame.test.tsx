@@ -11,6 +11,7 @@ import type { Puzzle } from '../../../core/types';
 function makeMedia() {
   return {
     playMoan: vi.fn(),
+    playEnding: vi.fn(),
     pickBackground: vi.fn(() => '/photo.jpg'),
     setMuted: vi.fn(),
     setVolume: vi.fn(),
@@ -60,29 +61,50 @@ describe('useGame', () => {
     expect(media.playMoan).not.toHaveBeenCalled();
   });
 
-  it('plays one moan per newly completed key, not on undo/redo', () => {
+  it('plays exactly one moan per move however many units complete, not on undo/redo', () => {
     saveGame(initGame(nearlyDone()));
     const media = makeMedia();
     const { result } = renderHook(() => useGame(asMedia(media)));
     const digit = result.current.state!.solution[0];
     act(() => result.current.dispatch({ type: 'select', index: 0 }));
     act(() => result.current.dispatch({ type: 'input', digit }));
-    expect(result.current.state!.lastCompleted).toHaveLength(3); // row, col, box
-    expect(media.playMoan).toHaveBeenCalledTimes(3);
+    expect(result.current.state!.lastCompleted).toHaveLength(3); // row + col + box at once
+    expect(media.playMoan).toHaveBeenCalledTimes(1); // but only one sound
     act(() => result.current.dispatch({ type: 'undo' }));
     act(() => result.current.dispatch({ type: 'redo' }));
-    expect(media.playMoan).toHaveBeenCalledTimes(3);
+    expect(media.playMoan).toHaveBeenCalledTimes(1);
   });
 
-  it('on win records stats once and clears the save', () => {
+  it('plays a moan when a move uses up a digit without completing a unit', () => {
+    // Blank cell 0 plus a peer in its row, column, and box, so filling cell 0
+    // uses up its digit's 9th copy yet finishes no row/col/box.
+    const full = generatePuzzle(makeRng(1), 'easy').solution;
+    const d = full[0];
+    const givens = full.slice();
+    for (const b of [0, 1, 9, 10]) givens[b] = 0;
+    saveGame(initGame({ givens, solution: full, difficulty: 'easy' }));
+    const media = makeMedia();
+    const { result } = renderHook(() => useGame(asMedia(media)));
+    act(() => result.current.dispatch({ type: 'select', index: 0 }));
+    act(() => result.current.dispatch({ type: 'input', digit: d }));
+    expect(result.current.state!.lastCompleted).toHaveLength(0);
+    expect(result.current.state!.exhaustedDigits).toEqual([d]);
+    expect(media.playMoan).toHaveBeenCalledTimes(1);
+  });
+
+  it('on win records stats once, clears the save, and plays the finale (not a moan)', () => {
     saveGame(initGame(nearlyDone()));
-    const { result } = renderHook(() => useGame(asMedia(makeMedia())));
+    const media = makeMedia();
+    const { result } = renderHook(() => useGame(asMedia(media)));
     const sol = result.current.state!.solution;
     act(() => result.current.dispatch({ type: 'select', index: 0 }));
-    act(() => result.current.dispatch({ type: 'input', digit: sol[0] }));
+    act(() => result.current.dispatch({ type: 'input', digit: sol[0] })); // completes units -> one moan
+    expect(media.playMoan).toHaveBeenCalledTimes(1);
     act(() => result.current.dispatch({ type: 'select', index: 40 }));
-    act(() => result.current.dispatch({ type: 'input', digit: sol[40] }));
+    act(() => result.current.dispatch({ type: 'input', digit: sol[40] })); // wins
     expect(result.current.state!.status).toBe('won');
+    expect(media.playEnding).toHaveBeenCalledTimes(1);
+    expect(media.playMoan).toHaveBeenCalledTimes(1); // winning move plays the finale, not a moan
     expect(loadStats().gamesCompleted).toBe(1);
     expect(loadGame()).toBeNull();
     act(() => vi.advanceTimersByTime(3000));

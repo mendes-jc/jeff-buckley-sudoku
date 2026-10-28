@@ -16,7 +16,11 @@ class MockAudio {
   }
 }
 
-const manifest = { photos: ['a.jpg', 'b.jpg', 'c.jpg'], moans: ['m1.mp3', 'm2.mp3'] };
+const manifest = {
+  photos: ['a.jpg', 'b.jpg', 'c.jpg'],
+  moans: ['m1.mp3', 'm2.mp3'],
+  endings: ['finale-end.mp3'],
+};
 const g = globalThis as any;
 const realAudio = g.Audio;
 const realFetch = g.fetch;
@@ -48,6 +52,29 @@ describe('MediaController', () => {
     expect(MockAudio.instances[0].played).toBe(1);
   });
 
+  it('playEnding creates and plays a finale sound from the endings list', () => {
+    const m = new MediaController(manifest, makeRng(1));
+    m.setVolume(0.6);
+    m.playEnding();
+    expect(MockAudio.instances).toHaveLength(1);
+    expect(manifest.endings).toContain(MockAudio.instances[0].src);
+    expect(MockAudio.instances[0].volume).toBe(0.6);
+    expect(MockAudio.instances[0].played).toBe(1);
+  });
+
+  it('playEnding is a silent no-op when no endings are configured', () => {
+    const m = new MediaController({ photos: [], moans: ['m1.mp3'], endings: [] }, makeRng(1));
+    expect(() => m.playEnding()).not.toThrow();
+    expect(MockAudio.instances).toHaveLength(0);
+  });
+
+  it('playEnding respects mute', () => {
+    const m = new MediaController(manifest, makeRng(1));
+    m.setMuted(true);
+    m.playEnding();
+    expect(MockAudio.instances).toHaveLength(0);
+  });
+
   it('clamps volume to [0,1]', () => {
     const m = new MediaController(manifest, makeRng(1));
     m.setVolume(5);
@@ -65,7 +92,7 @@ describe('MediaController', () => {
   });
 
   it('[Review Focus] empty manifest: null background and silent no-op', () => {
-    const m = new MediaController({ photos: [], moans: [] }, makeRng(1));
+    const m = new MediaController({ photos: [], moans: [], endings: [] }, makeRng(1));
     expect(m.pickBackground()).toBeNull();
     expect(() => m.playMoan()).not.toThrow();
     expect(MockAudio.instances).toHaveLength(0);
@@ -102,16 +129,16 @@ describe('loadManifest', () => {
   it('returns parsed manifest', async () => {
     g.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ photos: ['x'], moans: ['y'] }),
+      json: async () => ({ photos: ['x'], moans: ['y'], endings: ['z-end.mp3'] }),
     });
-    expect(await loadManifest('/m.json')).toEqual({ photos: ['x'], moans: ['y'] });
+    expect(await loadManifest('/m.json')).toEqual({ photos: ['x'], moans: ['y'], endings: ['z-end.mp3'] });
   });
   it('normalizes missing fields', async () => {
     g.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ photos: ['x'] }) });
-    expect(await loadManifest()).toEqual({ photos: ['x'], moans: [] });
+    expect(await loadManifest()).toEqual({ photos: ['x'], moans: [], endings: [] });
   });
   it('returns empty on network error, non-OK, bad JSON', async () => {
-    const empty = { photos: [], moans: [] };
+    const empty = { photos: [], moans: [], endings: [] };
     g.fetch = vi.fn().mockRejectedValue(new Error('net'));
     expect(await loadManifest()).toEqual(empty);
     g.fetch = vi.fn().mockResolvedValue({ ok: false, json: async () => ({}) });

@@ -17,6 +17,7 @@ const NOW = 1_700_000_000_000;
 function makeMedia() {
   return {
     playMoan: vi.fn(),
+    playEnding: vi.fn(),
     pickBackground: vi.fn(() => null),
     setMuted: vi.fn(),
     setVolume: vi.fn(),

@@ -7,10 +7,11 @@ export interface CellProps {
   peer: boolean;
   sameValue: boolean;
   conflict: boolean;
+  wrong?: boolean;
   onSelect: (index: number) => void;
 }
 
-export function Cell({ index, cell, selected, peer, sameValue, conflict, onSelect }: CellProps) {
+export function Cell({ index, cell, selected, peer, sameValue, conflict, wrong, onSelect }: CellProps) {
   const cls = [
     'cell',
     cell.given ? 'given' : '',
@@ -18,6 +19,7 @@ export function Cell({ index, cell, selected, peer, sameValue, conflict, onSelec
     peer ? 'peer' : '',
     sameValue ? 'same-value' : '',
     conflict ? 'conflict' : '',
+    wrong ? 'wrong' : '',
   ]
     .filter(Boolean)
     .join(' ');

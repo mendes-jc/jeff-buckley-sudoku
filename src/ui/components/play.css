@@ -160,6 +160,13 @@
 .cell.conflict {
   box-shadow: inset 0 0 0 2px var(--danger);
 }
+/* easy/medium: a gentle "not quite there" nudge, not a hard error */
+.cell.wrong .value {
+  color: var(--warn);
+}
+.cell.wrong {
+  box-shadow: inset 0 0 0 1.5px var(--warn);
+}
 .notes {
   position: absolute;
   inset: 2px;

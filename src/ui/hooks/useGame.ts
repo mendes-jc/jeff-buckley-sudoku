@@ -33,7 +33,7 @@ function slotReducer(state: GameSlot, action: Action): GameSlot {
 /** Restore a saved game; clear lastCompleted so resuming never replays moans. */
 function initSlot(): GameSlot {
   const saved = loadGame();
-  return saved ? { ...saved, lastCompleted: [] } : null;
+  return saved ? { ...saved, lastCompleted: [], exhaustedDigits: [] } : null;
 }
 
 /** Local-timezone-independent "today": UTC date, ISO yyyy-mm-dd. */
@@ -53,7 +53,7 @@ export function useGame(injectedMedia?: MediaController) {
   const [state, dispatch] = useReducer(slotReducer, null, initSlot);
   const [backgroundPhoto, setBackgroundPhoto] = useState<string | null>(null);
 
-  const mediaRef = useRef<MediaController>(injectedMedia ?? new MediaController({ photos: [], moans: [] }));
+  const mediaRef = useRef<MediaController>(injectedMedia ?? new MediaController({ photos: [], moans: [], endings: [] }));
   if (injectedMedia) mediaRef.current = injectedMedia;
 
   // Production: swap in a manifest-backed controller once loaded; pick a background for a resumed game.
@@ -104,18 +104,24 @@ export function useGame(injectedMedia?: MediaController) {
     if (state && state.status === 'playing') saveGame(state);
   }, [state]);
 
-  // Moan: once per transition, keyed on lastCompleted identity; empty arrays skipped.
+  const status = state?.status;
+
+  // Moan: exactly one per move that completes any unit(s) or uses up a digit's
+  // last copy — never two sounds at once for a row+column finishing together.
+  // The winning move plays the finale (below) instead, so skip the moan then.
+  // Both arrays get a fresh identity each move, so this runs once per move.
   const lastCompleted = state?.lastCompleted;
+  const exhaustedDigits = state?.exhaustedDigits;
   useEffect(() => {
-    if (!lastCompleted || lastCompleted.length === 0) return;
-    for (let i = 0; i < lastCompleted.length; i++) mediaRef.current.playMoan();
-  }, [lastCompleted]);
+    if (status === 'won') return;
+    const moanWorthy = (lastCompleted?.length ?? 0) > 0 || (exhaustedDigits?.length ?? 0) > 0;
+    if (moanWorthy) mediaRef.current.playMoan();
+  }, [lastCompleted, exhaustedDigits, status]);
 
   // Win: once per transition to 'won' (ref guards StrictMode effect re-runs).
   const stateRef = useRef(state);
   stateRef.current = state;
   const winHandled = useRef(false);
-  const status = state?.status;
   useEffect(() => {
     if (status !== 'won') {
       winHandled.current = false;
@@ -123,6 +129,7 @@ export function useGame(injectedMedia?: MediaController) {
     }
     if (winHandled.current) return;
     winHandled.current = true;
+    mediaRef.current.playEnding();
     const s = stateRef.current!;
     saveStats(recordWin(loadStats(), s.difficulty, s.elapsedMs));
     if (s.isDaily) saveDaily(recordDaily(loadDaily(), todayIso()));

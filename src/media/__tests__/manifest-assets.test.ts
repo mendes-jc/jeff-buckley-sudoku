@@ -14,4 +14,12 @@ describe('public/assets/manifest.json', () => {
       expect(typeof p).toBe('string');
     }
   });
+
+  it('has an endings section (finale sounds) of string paths that all contain "-end"', () => {
+    expect(Array.isArray(manifest.endings)).toBe(true);
+    for (const p of manifest.endings ?? []) {
+      expect(typeof p).toBe('string');
+      expect(p).toContain('-end');
+    }
+  });
 });

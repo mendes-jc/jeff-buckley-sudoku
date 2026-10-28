@@ -21,8 +21,17 @@ export class MediaController {
 
   /** Fresh Audio per call so rapid completions overlap cleanly. Never throws. */
   playMoan(): void {
+    this.playFrom(this.manifest.moans);
+  }
+
+  /** Finale sound played once when the puzzle is solved. Silent if none are configured. */
+  playEnding(): void {
+    this.playFrom(this.manifest.endings);
+  }
+
+  private playFrom(list: string[]): void {
     if (this.muted) return;
-    const src = this.pick(this.manifest.moans);
+    const src = this.pick(list);
     if (src === null) return;
     try {
       const audio = new Audio(src);

@@ -9,9 +9,12 @@ export interface GridProps {
 }
 
 export function Grid({ state, conflicts, dispatch }: GridProps) {
-  const { cells, selected, difficulty } = state;
+  const { cells, selected, difficulty, solution } = state;
   const highlight = selected !== null && difficulty !== 'expert';
   const selValue = selected !== null ? cells[selected].value : 0;
+  // Easy/Medium: gently flag a filled cell that doesn't match the solution.
+  // Red conflicts already shout, so orange only shows when a cell isn't in conflict.
+  const flagWrong = difficulty === 'easy' || difficulty === 'medium';
   return (
     <div className="grid" role="grid" aria-label="Sudoku board">
       {cells.map((cell, i) => {
@@ -21,6 +24,9 @@ export function Grid({ state, conflicts, dispatch }: GridProps) {
           !isSel &&
           (rowOf(i) === rowOf(selected!) || colOf(i) === colOf(selected!) || boxOf(i) === boxOf(selected!));
         const sameValue = highlight && !isSel && selValue !== 0 && cell.value === selValue;
+        const isConflict = conflicts.has(i);
+        const wrong =
+          flagWrong && !isConflict && !cell.given && cell.value !== 0 && cell.value !== solution[i];
         return (
           <Cell
             key={i}
@@ -29,7 +35,8 @@ export function Grid({ state, conflicts, dispatch }: GridProps) {
             selected={isSel}
             peer={peer}
             sameValue={sameValue}
-            conflict={conflicts.has(i)}
+            conflict={isConflict}
+            wrong={wrong}
             onSelect={(index) => dispatch({ type: 'select', index })}
           />
         );

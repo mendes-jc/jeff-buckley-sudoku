@@ -100,6 +100,42 @@ describe('play screen', () => {
     expect(has(cell(dupIdx), 'conflict')).toBe(true);
   });
 
+  it('easy: a wrong but non-conflicting digit gets the orange "wrong" class, not conflict', async () => {
+    const p = puzzleOf('easy');
+    const i = firstBlank(p);
+    const peerVals = new Set<number>([...peers(i)].map((q) => p.givens[q]).filter((v) => v !== 0));
+    const w = [1, 2, 3, 4, 5, 6, 7, 8, 9].find((d) => d !== p.solution[i] && !peerVals.has(d))!;
+    expect(w).toBeGreaterThan(0);
+    render(<Harness puzzle={p} />);
+    await userEvent.click(cell(i));
+    await userEvent.click(digitBtn(w));
+    expect(has(cell(i), 'wrong')).toBe(true);
+    expect(has(cell(i), 'conflict')).toBe(false);
+  });
+
+  it('easy: a wrong digit that also conflicts stays red, never orange', async () => {
+    const p = puzzleOf('easy');
+    const i = firstBlank(p);
+    const rowStart = Math.floor(i / 9) * 9;
+    const dupIdx = [...Array(9).keys()].map((k) => rowStart + k).find((k) => p.givens[k] !== 0)!;
+    render(<Harness puzzle={p} />);
+    await userEvent.click(cell(i));
+    await userEvent.click(digitBtn(p.givens[dupIdx]));
+    expect(has(cell(i), 'conflict')).toBe(true);
+    expect(has(cell(i), 'wrong')).toBe(false);
+  });
+
+  it('expert: wrong placements are not flagged (stays challenging)', async () => {
+    const p = puzzleOf('expert');
+    const i = firstBlank(p);
+    const peerVals = new Set<number>([...peers(i)].map((q) => p.givens[q]).filter((v) => v !== 0));
+    const w = [1, 2, 3, 4, 5, 6, 7, 8, 9].find((d) => d !== p.solution[i] && !peerVals.has(d))!;
+    render(<Harness puzzle={p} />);
+    await userEvent.click(cell(i));
+    await userEvent.click(digitBtn(w));
+    expect(has(cell(i), 'wrong')).toBe(false);
+  });
+
   it('notes mode renders a pencil mark, not a value', async () => {
     const p = puzzleOf('easy');
     const i = firstBlank(p);

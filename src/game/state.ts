@@ -25,6 +25,8 @@ export interface GameState {
   status: 'playing' | 'won';
   completedUnits: string[];
   lastCompleted: string[];
+  /** Digits whose 9th copy was placed by the move that produced this state (occupancy, never correctness). */
+  exhaustedDigits: number[];
   undoStack: Snapshot[];
   redoStack: Snapshot[];
 }
@@ -42,6 +44,21 @@ export type Action =
 
 const toBoard = (cells: GameCell[]): Board => cells.map((c) => c.value);
 
+const digitCount = (board: Board, digit: number): number => {
+  let n = 0;
+  for (const v of board) if (v === digit) n++;
+  return n;
+};
+
+/** Digits that reached 9 placements going from `prev` to `next` (all copies now used up). */
+function digitsNewlyExhausted(prev: Board, next: Board): number[] {
+  const out: number[] = [];
+  for (let d = 1; d <= 9; d++) {
+    if (digitCount(next, d) === 9 && digitCount(prev, d) < 9) out.push(d);
+  }
+  return out;
+}
+
 export function initGame(puzzle: Puzzle, isDaily = false): GameState {
   const cells: GameCell[] = puzzle.givens.map((v) =>
     v !== 0 ? { value: v, notes: [], given: true } : { value: 0, notes: [], given: false },
@@ -58,6 +75,7 @@ export function initGame(puzzle: Puzzle, isDaily = false): GameState {
     status: 'playing',
     completedUnits: [...completedUnitKeys(toBoard(cells))],
     lastCompleted: [],
+    exhaustedDigits: [],
     undoStack: [],
     redoStack: [],
   };
@@ -70,6 +88,7 @@ export function initGame(puzzle: Puzzle, isDaily = false): GameState {
  */
 function commit(state: GameState, cells: GameCell[]): GameState {
   const board = toBoard(cells);
+  const prevBoard = toBoard(state.cells);
   const prev = new Set(state.completedUnits);
   const next = completedUnitKeys(board);
   const full = board.every((v) => v !== 0);
@@ -81,6 +100,7 @@ function commit(state: GameState, cells: GameCell[]): GameState {
     redoStack: [],
     completedUnits: [...next],
     lastCompleted: newlyCompleted(prev, next),
+    exhaustedDigits: digitsNewlyExhausted(prevBoard, board),
     status: won ? 'won' : state.status,
   };
 }
@@ -97,11 +117,12 @@ function restore(state: GameState, cells: GameCell[], undoStack: Snapshot[], red
     redoStack,
     completedUnits: [...completedUnitKeys(board)],
     lastCompleted: [],
+    exhaustedDigits: [],
     status: won ? 'won' : 'playing',
   };
 }
 
-const noop = (state: GameState): GameState => ({ ...state, lastCompleted: [] });
+const noop = (state: GameState): GameState => ({ ...state, lastCompleted: [], exhaustedDigits: [] });
 
 export function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
@@ -109,7 +130,7 @@ export function reducer(state: GameState, action: Action): GameState {
       return initGame(action.puzzle, action.isDaily ?? false);
 
     case 'select':
-      return { ...state, selected: action.index, lastCompleted: [] };
+      return { ...state, selected: action.index, lastCompleted: [], exhaustedDigits: [] };
 
     case 'input': {
       const i = state.selected;
@@ -139,7 +160,7 @@ export function reducer(state: GameState, action: Action): GameState {
     }
 
     case 'toggleNotes':
-      return { ...state, notesMode: !state.notesMode, lastCompleted: [] };
+      return { ...state, notesMode: !state.notesMode, lastCompleted: [], exhaustedDigits: [] };
 
     case 'undo': {
       if (state.undoStack.length === 0) return noop(state);
@@ -154,10 +175,10 @@ export function reducer(state: GameState, action: Action): GameState {
     }
 
     case 'togglePause':
-      return { ...state, paused: !state.paused, lastCompleted: [] };
+      return { ...state, paused: !state.paused, lastCompleted: [], exhaustedDigits: [] };
 
     case 'tick':
       if (state.paused || state.status !== 'playing') return noop(state);
-      return { ...state, elapsedMs: state.elapsedMs + action.ms, lastCompleted: [] };
+      return { ...state, elapsedMs: state.elapsedMs + action.ms, lastCompleted: [], exhaustedDigits: [] };
   }
 }

@@ -29,6 +29,7 @@
   --blush-soft: #e7b9c4;
 
   --danger: #c65c72;
+  --warn: #cf7a2e; /* wrong-spot alert (easy/medium) — amber, softer than danger */
 
   --line: rgba(58, 39, 48, 0.16);
   --line-strong: rgba(192, 137, 79, 0.62);
@@ -75,6 +76,7 @@
     --blush-soft: #f0c2cf;
 
     --danger: #ec7a90;
+    --warn: #f0a94e; /* wrong-spot alert (easy/medium) — amber, softer than danger */
 
     --line: rgba(246, 238, 242, 0.13);
     --line-strong: rgba(224, 181, 110, 0.5);
@@ -114,6 +116,7 @@
   --blush-soft: #f0c2cf;
 
   --danger: #ec7a90;
+  --warn: #f0a94e; /* wrong-spot alert (easy/medium) — amber, softer than danger */
 
   --line: rgba(246, 238, 242, 0.13);
   --line-strong: rgba(224, 181, 110, 0.5);

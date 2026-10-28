@@ -112,6 +112,33 @@ describe('game reducer', () => {
     expect(s.status).toBe('playing');
   });
 
+  it('reports a digit as exhausted when its ninth copy is placed', () => {
+    // Blank cell 0 and three peers (row/col/box) so filling cell 0 finishes no unit.
+    let s = sel(initGame(puzzleWithBlanks([0, 1, 9, 10])), 0);
+    s = input(s, 5); // SOLUTION[0] === 5, the only blanked 5
+    expect(s.exhaustedDigits).toEqual([5]);
+    expect(s.lastCompleted).toEqual([]);
+  });
+
+  it('does not report exhaustion while copies of the digit remain', () => {
+    // Two 5s blanked (indices 0 and 14); placing one leaves eight on the board.
+    let s = sel(initGame(puzzleWithBlanks([0, 14])), 0);
+    s = input(s, 5);
+    expect(s.exhaustedDigits).toEqual([]);
+  });
+
+  it('clears exhaustedDigits on undo and select', () => {
+    let s = sel(initGame(puzzleWithBlanks([0, 1, 9, 10])), 0);
+    s = input(s, 5);
+    expect(s.exhaustedDigits).toEqual([5]);
+    s = reducer(s, { type: 'undo' });
+    expect(s.exhaustedDigits).toEqual([]);
+    s = input(sel(s, 0), 5);
+    expect(s.exhaustedDigits).toEqual([5]);
+    s = sel(s, 1);
+    expect(s.exhaustedDigits).toEqual([]);
+  });
+
   it('wins only on full conflict-free board', () => {
     let s = sel(initGame(puzzleWithBlanks([0])), 0);
     s = input(s, 1);
